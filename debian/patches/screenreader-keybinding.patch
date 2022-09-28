@@ -1,0 +1,26 @@
+Description: Add screen reader keybinding for improve accessibility
+
+The screen reader keybinding was not set as default and was one of the
+things making difficult have good accessibility support in cinnamon.
+This commit will add keybinding Alt+Super+s like the gnome one,
+improving slightly the accessibility.
+Author: Fabio Fantoni <fantonifabio@tiscali.it>
+Forwarded: https://github.com/linuxmint/cinnamon-desktop/pull/198
+Last-Update: 2021-08-15
+---
+ ...rg.cinnamon.desktop.keybindings.media-keys.gschema.xml.in.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/schemas/org.cinnamon.desktop.keybindings.media-keys.gschema.xml.in.in b/schemas/org.cinnamon.desktop.keybindings.media-keys.gschema.xml.in.in
+index 7975ff7..e5eec2e 100644
+--- a/schemas/org.cinnamon.desktop.keybindings.media-keys.gschema.xml.in.in
++++ b/schemas/org.cinnamon.desktop.keybindings.media-keys.gschema.xml.in.in
+@@ -142,7 +142,7 @@
+       <_description>Binding to launch the web browser.</_description>
+     </key>
+     <key name="screenreader" type="as">
+-      <default>['']</default>
++      <default>['&lt;Alt&gt;&lt;Super&gt;s']</default>
+       <_summary>Toggle screen reader</_summary>
+       <_description>Binding to start the screen reader</_description>
+     </key>
