@@ -1,19 +1,17 @@
 Description: Change the default schema value to Default instead of Adwaita.
 Author: marga@debian.org
 Forwarded: not yet.
-Last-Update: 2017-01-29
+Last-Update: 2022-06-15
 ---
 This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
-Index: cinnamon-desktop/schemas/org.cinnamon.desktop.wm.preferences.gschema.xml.in.in
-===================================================================
---- cinnamon-desktop.orig/schemas/org.cinnamon.desktop.wm.preferences.gschema.xml.in.in	2016-05-16 13:40:04.826893757 +0200
-+++ cinnamon-desktop/schemas/org.cinnamon.desktop.wm.preferences.gschema.xml.in.in	2017-01-29 15:56:51.301330070 +0100
-@@ -215,7 +215,7 @@
-       </_description>
+--- a/schemas/org.cinnamon.desktop.wm.preferences.gschema.xml.in
++++ b/schemas/org.cinnamon.desktop.wm.preferences.gschema.xml.in
+@@ -213,7 +213,7 @@
+       </description>
      </key>
      <key name="theme" type="s">
 -      <default>'Adwaita'</default>
 +      <default>'Default'</default>
-       <_summary>Current theme</_summary>
-       <_description>
+       <summary>Current theme</summary>
+       <description>
          The theme determines the appearance of window borders, titlebar,

@@ -161,6 +161,7 @@ static void gnome_rr_screen_get_property (GObject*, guint, GValue*, GParamSpec*)
 static gboolean gnome_rr_screen_initable_init (GInitable*, GCancellable*, GError**);
 static void gnome_rr_screen_initable_iface_init (GInitableIface *iface);
 G_DEFINE_TYPE_WITH_CODE (GnomeRRScreen, gnome_rr_screen, G_TYPE_OBJECT,
+        G_ADD_PRIVATE (GnomeRRScreen)
         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, gnome_rr_screen_initable_iface_init))
 
 G_DEFINE_BOXED_TYPE (GnomeRRCrtc, gnome_rr_crtc, crtc_copy, crtc_free)
@@ -705,7 +706,7 @@ screen_on_event (GdkXEvent *xevent,
      * events.  We only care about "the screens changed in some way or another"
      * for now.
      *
-     * If we ever run into a situtation that could benefit from processing more
+     * If we ever run into a situation that could benefit from processing more
      * detailed events, we can enable this code again.
      *
      * Note that the X server sends RRScreenChangeNotify in conjunction with the
@@ -849,7 +850,6 @@ void
 gnome_rr_screen_class_init (GnomeRRScreenClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
-    g_type_class_add_private (klass, sizeof (GnomeRRScreenPrivate));
 
     gobject_class->set_property = gnome_rr_screen_set_property;
     gobject_class->get_property = gnome_rr_screen_get_property;
@@ -939,7 +939,7 @@ gnome_rr_screen_class_init (GnomeRRScreenClass *klass)
 void
 gnome_rr_screen_init (GnomeRRScreen *self)
 {
-    GnomeRRScreenPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE (self, GNOME_TYPE_RR_SCREEN, GnomeRRScreenPrivate);
+    GnomeRRScreenPrivate *priv = gnome_rr_screen_get_instance_private (self);
     self->priv = priv;
 
     priv->gdk_screen = NULL;
@@ -1764,7 +1764,7 @@ gnome_rr_output_get_ids_from_edid (GnomeRROutput         *output,
 /**
  * gnome_rr_output_get_backlight_min:
  *
- * Returns: The mimimum backlight value, or -1 if not supported
+ * Returns: The minimum backlight value, or -1 if not supported
  */
 gint
 gnome_rr_output_get_backlight_min (GnomeRROutput *output)
@@ -2509,7 +2509,7 @@ crtc_initialize (GnomeRRCrtc        *crtc,
     
     if (!info)
     {
-        /* FIXME: We need to reaquire the screen resources */
+        /* FIXME: We need to reacquire the screen resources */
         /* FIXME: can we actually catch BadRRCrtc, and does it make sense to emit that? */
 
         /* Translators: CRTC is a CRT Controller (this is X terminology).
@@ -2753,12 +2753,22 @@ gnome_rr_crtc_get_gamma (GnomeRRCrtc *crtc, int *size,
 
 /* The minimum resolution at which we turn on a window-scale of 2 */
 #define HIDPI_LIMIT 192
-#define HIDPI_MIN_SCALED_HEIGHT 720
 
-/* The minimum screen height at which we turn on a window-scale of 2;
- * below this there just isn't enough vertical real estate for GNOME
+/* The minimum screen height at which we automatically turn on a window
+ *-scale of 2; below this there just isn't enough vertical real estate for GNOME
  * apps to work, and it's better to just be tiny */
-#define HIDPI_MIN_HEIGHT 1500
+#define MINIMUM_REAL_VERTICAL_PIXELS 1400
+
+/* The minimum logical height we'll allow - any smaller than this is
+ * not very usable and can make Cinnamon behave unpredictably. */
+#define MINIMUM_LOGICAL_VERTICAL_PIXELS 700
+
+static gboolean
+is_logical_size_large_enough (int width,
+                              int height)
+{
+  return height >= MINIMUM_LOGICAL_VERTICAL_PIXELS;
+}
 
 static gboolean
 is_scale_valid_for_size (float width,
@@ -2766,7 +2776,8 @@ is_scale_valid_for_size (float width,
                          float scale)
 {
   return scale >= MINIMUM_LOGICAL_SCALE_FACTOR &&
-         scale <= MAXIMUM_LOGICAL_SCALE_FACTOR;
+         scale <= MAXIMUM_LOGICAL_SCALE_FACTOR &&
+         is_logical_size_large_enough (floorf (width/scale), floorf (height/scale));
 }
 
 static float
@@ -2969,9 +2980,9 @@ gnome_rr_screen_calculate_best_global_scale (GnomeRRScreen *screen,
              " REAL pixel size: %d x %d.  Current global scale: %d, reported monitor scale: %d",
              index, width_mm, height_mm, real_width, real_height, gnome_rr_screen_get_global_scale (NULL), monitor_scale);
 
-    if (real_height < HIDPI_MIN_HEIGHT)
+    if (real_height < MINIMUM_REAL_VERTICAL_PIXELS)
     {
-        g_debug ("REAL height of %d for monitor %d is less than %d, so the recommended scale will be 1", real_height, index, HIDPI_MIN_HEIGHT);
+        g_debug ("REAL height of %d for monitor %d is less than %d, so the recommended scale will be 1", real_height, index, MINIMUM_REAL_VERTICAL_PIXELS);
         goto out;
     }
 

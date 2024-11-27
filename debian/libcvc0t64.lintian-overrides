@@ -1,0 +1,4 @@
+# We want that packages that link against libcvc0t64 to have gir1.2-cvc-1.0 as a
+# dependency
+libcvc0t64: symbols-declares-dependency-on-other-package gir1.2-cvc-1.0 (libcvc.so.0) [symbols]
+libcvc0t64: package-name-doesnt-match-sonames libcvc0

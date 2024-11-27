@@ -58,7 +58,7 @@ enum {
 	PROP_FORMAT_STRING,
 };
 
-G_DEFINE_TYPE (GnomeWallClock, gnome_wall_clock, G_TYPE_OBJECT);
+G_DEFINE_TYPE_WITH_PRIVATE (GnomeWallClock, gnome_wall_clock, G_TYPE_OBJECT);
 
 /* Date/Time format defaults - options are stored in org.cinnamon.desktop.interface keys.
  * The wall clock is used variously in Cinnamon applets and desklets, as well as
@@ -66,31 +66,31 @@ G_DEFINE_TYPE (GnomeWallClock, gnome_wall_clock, G_TYPE_OBJECT);
 
 /* Default date format (typically matching date portion of WITH_DATE_* defaults.)
  * Currently used by cinnamon-screensaver default clock */
-#define DATE_ONLY             (_("%A, %B %e"))
+#define DATE_ONLY             (_("%A, %B %-e"))
 
-/* Defaut date/time format when show-date, show-seconds, use-24h are set */
-#define WITH_DATE_24H_SECONDS (_("%A %B %e, %R:%S"))
+/* Default date/time format when show-date, show-seconds, use-24h are set */
+#define WITH_DATE_24H_SECONDS (_("%A %B %-e, %R:%S"))
 
 /* Default date/time format when show-date, show-seconds are set */
-#define WITH_DATE_12H_SECONDS (_("%A %B %e, %l:%M:%S %p"))
+#define WITH_DATE_12H_SECONDS (_("%A %B %-e, %-l:%M:%S %p"))
 
 /* Default date/time format when show-date, use-24h are set */
-#define WITH_DATE_24H         (_("%A %B %e, %R"))
+#define WITH_DATE_24H         (_("%A %B %-e, %R"))
 
 /* Default date/time format when just show-date is set */
-#define WITH_DATE_12H         (_("%A %B %e, %l:%M %p"))
+#define WITH_DATE_12H         (_("%A %B %-e, %-l:%M %p"))
 
 /* Default date/time format when show-seconds, use-24h are set */
 #define NO_DATE_24H_SECONDS   (_("%R:%S"))
 
 /* Default date/time format when just show-seconds is set */
-#define NO_DATE_12H_SECONDS   (_("%l:%M:%S %p"))
+#define NO_DATE_12H_SECONDS   (_("%-l:%M:%S %p"))
 
 /* Default date/time format when just use-24h is set */
 #define NO_DATE_24H           (_("%R"))
 
 /* Default date/time format with no options are set */
-#define NO_DATE_12H           (_("%l:%M %p"))
+#define NO_DATE_12H           (_("%-l:%M %p"))
 
 #define NO_DATE               ("")
 
@@ -112,7 +112,7 @@ gnome_wall_clock_init (GnomeWallClock *self)
 {
 	GFile *tz;
 
-	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, GNOME_TYPE_WALL_CLOCK, GnomeWallClockPrivate);
+	self->priv = gnome_wall_clock_get_instance_private (self);
 	
 	self->priv->clock_string = NULL;
 	
@@ -244,8 +244,6 @@ gnome_wall_clock_class_init (GnomeWallClockClass *klass)
                                      "The string to format the clock to",
                                      NULL,
                                      G_PARAM_READABLE | G_PARAM_WRITABLE));
-
-	g_type_class_add_private (gobject_class, sizeof (GnomeWallClockPrivate));
 }
 
 static void
@@ -586,7 +584,6 @@ gnome_wall_clock_set_format_string (GnomeWallClock *clock,
 
 /**
  * gnome_wall_clock_lctime_format:
- * @clock: The GnomeWallClock
  * @gettext_domain: (nullable)
  * @format_string: (nullable)
  *

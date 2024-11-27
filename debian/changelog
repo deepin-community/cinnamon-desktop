@@ -1,3 +1,152 @@
+cinnamon-desktop (6.2.0-1) unstable; urgency=medium
+
+  [ Joshua Peisach ]
+  * New upstream version 6.2.0
+  * Bump reverse-dep breaks to 6.2
+
+  [ Fabio Fantoni ]
+  * Update standards version to 4.7.0, no changes needed
+  * Add d/README.source with a wiki link with details about packaging
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Fri, 04 Oct 2024 18:14:51 +0200
+
+cinnamon-desktop (6.0.0-2) unstable; urgency=medium
+
+  * Release to unstable
+  * fix gsettings-override file name, was broken from 5.8.0-2.1~exp1
+  * d/control: add dpkg-dev >= 1.22.5 to build-deps
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Sat, 30 Mar 2024 13:14:48 +0100
+
+cinnamon-desktop (6.0.0-1) experimental; urgency=medium
+
+  * New upstream version 6.0.0
+  * d/control: add libsystemd-dev to build-deps
+  * Bump reverse dep breaks to 6.0
+  * Update symbols
+  * Add missed breaks of reverse-deps to shared libraries packages
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Sun, 11 Feb 2024 13:03:41 +0100
+
+cinnamon-desktop (5.8.0-2.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Rename libraries for 64-bit time_t transition.  Closes: #1062060
+
+ -- Steve Langasek <vorlon@debian.org>  Thu, 29 Feb 2024 06:22:50 +0000
+
+cinnamon-desktop (5.8.0-2.1~exp1) experimental; urgency=medium
+
+  * Non-maintainer upload.
+  * Rename libraries for 64-bit time_t transition.
+
+ -- Steve Langasek <vorlon@debian.org>  Wed, 31 Jan 2024 08:53:19 +0000
+
+cinnamon-desktop (5.8.0-2) unstable; urgency=medium
+
+  * Release to unstable
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Fri, 29 Sep 2023 13:14:18 +0200
+
+cinnamon-desktop (5.8.0-1) experimental; urgency=medium
+
+  * New upstream version 5.8.0
+  * Bump reverse dep breaks to 5.8
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Fri, 14 Jul 2023 12:12:17 +0200
+
+cinnamon-desktop (5.6.2-1) unstable; urgency=medium
+
+  * New upstream bugfix version 5.6.2
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Sat, 08 Apr 2023 18:51:13 +0200
+
+cinnamon-desktop (5.6.1-1) unstable; urgency=medium
+
+  * New upstream version 5.6.1
+  * Update standards version to 4.6.2, no changes needed
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Sun, 08 Jan 2023 20:44:00 +0100
+
+cinnamon-desktop (5.6.0-2) unstable; urgency=medium
+
+  * Release to unstable
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Sun, 25 Dec 2022 18:38:17 +0100
+
+cinnamon-desktop (5.6.0-1) experimental; urgency=medium
+
+  [ Joshua Peisach ]
+  * New upstream version 5.6.0
+  * Bump reverse dep breaks to 5.6
+
+  [ Fabio Fantoni ]
+  * d/control: replace libgdk-pixbuf2.0-dev with libgdk-pixbuf-2.0-dev
+    in build-deps. (Closes: #1019312)
+
+  [ Debian Janitor ]
+  * d/control: gir1.2-cinnamondesktop-3.0 and gir1.2-cvc-1.0 marked
+    Multi-Arch: same
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Tue, 20 Dec 2022 19:25:41 +0100
+
+cinnamon-desktop (5.4.2-2) unstable; urgency=medium
+
+  * Release to unstable
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Sun, 14 Aug 2022 11:20:50 +0200
+
+cinnamon-desktop (5.4.2-1) experimental; urgency=medium
+
+  * New upstream version 5.4.2
+  * Add 2 lintian override related to gir1.2-cinnamondesktop-3.0
+  * Update symbols
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Wed, 20 Jul 2022 21:33:13 +0200
+
+cinnamon-desktop (5.4.1-1) experimental; urgency=medium
+
+  * New upstream version 5.4.1
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Sun, 17 Jul 2022 21:27:34 +0200
+
+cinnamon-desktop (5.4.0-1) experimental; urgency=medium
+
+  * New upstream version 5.4.0
+  * Simplify d/watch
+  * d/copyright: update and add missed Upstream-Contact field
+  * d/control: update build-deps
+  * Refresh d/patches
+  * Update d/libcvc0.symbols
+  * Bump breaks of reverse deps to 5.4
+  * Specify that rules don't require root
+  * Bumped Standards-Version to 4.6.1
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Sun, 10 Jul 2022 22:27:13 +0200
+
+cinnamon-desktop (5.2.1-1) unstable; urgency=medium
+
+  [ Fabio Fantoni ]
+  * New upstream version 5.2.1
+
+  [ Christoph Martin ]
+  * Add myself to uploaders
+  * prepare unstable release
+
+ -- Christoph Martin <martin@uni-mainz.de>  Tue, 25 Jan 2022 13:27:55 +0100
+
+cinnamon-desktop (5.2.0-1) experimental; urgency=medium
+
+  * New upstream version 5.2.0
+  * Fix/update patches
+
+  * Remove useless --as-needed linker flag, set hardening to all
+  * Add myself to Uploaders
+  * Add missing Build-Depends-Package field in symbol files
+  * Bump deps and breaks, add dh-sequence-gir to build deps
+
+ -- Joshua Peisach <itzswirlz2020@outlook.com>  Fri, 03 Dec 2021 17:35:28 -0500
+
 cinnamon-desktop (5.0.0-2) unstable; urgency=medium
 
   * Release to unstable.

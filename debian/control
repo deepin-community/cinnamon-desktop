@@ -6,30 +6,33 @@ Uploaders:
  Maximiliano Curia <maxy@debian.org>,
  Margarita Manterola <marga@debian.org>,
  Fabio Fantoni <fantonifabio@tiscali.it>,
- Norbert Preining <norbert@preining.info>
-Build-Depends:
+ Norbert Preining <norbert@preining.info>,
+ Joshua Peisach <itzswirlz2020@outlook.com>,
+ Christoph Martin <martin@uni-mainz.de>,
+Build-Depends: dpkg-dev (>= 1.22.5),
  debhelper-compat (= 13),
- dh-python,
- dpkg-dev (>= 1.15.1),
- gobject-introspection (>= 0.10.2-1~),
- gtk-doc-tools (>= 1.4),
- intltool (>= 0.40.6),
+ dh-sequence-gir,
+ gobject-introspection,
+ gtk-doc-tools,
+ intltool,
  libaccountsservice-dev,
- libgdk-pixbuf2.0-dev (>= 2.22.0),
- libgirepository1.0-dev (>= 0.10.2-1~),
- libglib2.0-dev (>= 2.37.3),
- libgtk-3-dev (>= 3.3.16),
- libpulse-dev,
+ libgdk-pixbuf-2.0-dev,
+ libgirepository1.0-dev,
+ libglib2.0-dev,
+ libgtk-3-dev,
+ libpulse-dev (>= 12.99.3),
+ libsystemd-dev,
  libx11-dev,
  libxext-dev,
  libxkbfile-dev,
- libxml2-dev (>= 2.4.20),
- libxrandr-dev (>= 2:1.3),
- meson (>= 0.40.0),
+ libxml2-dev,
+ libxrandr-dev,
+ meson,
  python3:any,
  xkb-data,
  yelp-tools,
-Standards-Version: 4.4.0
+Standards-Version: 4.7.0
+Rules-Requires-Root: no
 Homepage: http://cinnamon.linuxmint.com/
 Vcs-Browser: https://salsa.debian.org/cinnamon-team/cinnamon-desktop
 Vcs-Git: https://salsa.debian.org/cinnamon-team/cinnamon-desktop.git
@@ -37,13 +40,13 @@ Vcs-Git: https://salsa.debian.org/cinnamon-team/cinnamon-desktop.git
 Package: cinnamon-desktop-data
 Architecture: all
 Breaks:
- cinnamon (<< 5.0),
- cinnamon-control-center (<< 5.0),
- cinnamon-screensaver (<< 5.0),
- cinnamon-session (<< 5.0),
- cinnamon-settings-daemon (<< 5.0),
+ cinnamon (<< 6.2),
+ cinnamon-control-center (<< 6.2),
+ cinnamon-screensaver (<< 6.2),
+ cinnamon-session (<< 6.2),
+ cinnamon-settings-daemon (<< 6.2),
 Multi-Arch: foreign
-Depends: python3, python3-gi, ${misc:Depends}, ${python3:Depends}
+Depends: ${misc:Depends}
 Description: Common files for Cinnamon desktop apps
  This package includes files that are shared between several Cinnamon
  apps (i18n files and configuration schemas).
@@ -55,9 +58,10 @@ Depends: ${gir:Depends}, ${misc:Depends}, ${shlibs:Depends}
 Description: Introspection data for CinnamonDesktop
  This package contains the introspection data for CinnamonDesktop.
 Breaks:
- cinnamon-common (<< 5.0),
- cinnamon-screensaver (<< 5.0),
- gir1.2-meta-muffin-0.0 (<< 5.0),
+ cinnamon-common (<< 6.2),
+ cinnamon-screensaver (<< 6.2),
+ gir1.2-meta-muffin-0.0 (<< 6.2),
+Multi-Arch: same
 
 Package: gir1.2-cvc-1.0
 Section: introspection
@@ -66,7 +70,8 @@ Depends: ${gir:Depends}, ${misc:Depends}, ${shlibs:Depends}
 Description: Introspection data for Cinnamon pulseaudio abstraction
  This package contains the introspection data for Cinnamon pulseaudio
  abstraction.
-Breaks: cinnamon (<< 5.0), cinnamon-settings-daemon (<< 5.0)
+Breaks: cinnamon (<< 6.2), cinnamon-settings-daemon (<< 6.2)
+Multi-Arch: same
 
 Package: libcinnamon-desktop-dev
 Section: libdevel
@@ -74,18 +79,20 @@ Architecture: any
 Depends:
  gir1.2-cinnamondesktop-3.0 (= ${binary:Version}),
  gir1.2-cvc-1.0 (= ${binary:Version}),
- libcinnamon-desktop4 (= ${binary:Version}),
- libcvc0 (= ${binary:Version}),
- libgtk-3-dev (>= 3.3.16),
+ libcinnamon-desktop4t64 (= ${binary:Version}),
+ libcvc0t64 (= ${binary:Version}),
+ libgtk-3-dev,
  libpulse-dev,
  libxkbfile-dev,
  ${misc:Depends},
 Description: Cinnamon library for loading .desktop files - development files
  This package provides the include files and static library for the Cinnamon
  desktop library functions.
-Breaks: libmuffin-dev (<< 5.0)
+Breaks: libmuffin-dev (<< 6.2)
 
-Package: libcinnamon-desktop4
+Package: libcinnamon-desktop4t64
+Provides: ${t64:Provides}
+Replaces: libcinnamon-desktop4
 Section: libs
 Architecture: any
 Multi-Arch: same
@@ -94,16 +101,22 @@ Depends:
  cinnamon-desktop-data (>= ${source:Version}),
  ${misc:Depends},
  ${shlibs:Depends},
-Recommends: hwdata (>= 0.227-1)
+Recommends: hwdata
 Breaks:
- cinnamon-control-center (<< 5.0),
- cinnamon-settings-daemon (<< 5.0),
- libcinnamon-control-center1 (<< 5.0),
- nemo (<< 5.0),
+ cinnamon (<< 6.2),
+ cinnamon-control-center (<< 6.2),
+ cinnamon-settings-daemon (<< 6.2),
+ gir1.2-cinnamondesktop-3.0 (<< ${source:Version}),
+ libcinnamon-control-center1 (<< 6.2),
+ libcinnamon-desktop4 (<< ${source:Version}),
+ libmuffin0 (<< 6.2),
+ nemo (<< 6.2),
 Description: Cinnamon library for loading .desktop files
  This library is used by Cinnamon to load the .desktop files.
 
-Package: libcvc0
+Package: libcvc0t64
+Provides: ${t64:Provides}
+Replaces: libcvc0
 Section: libs
 Architecture: any
 Multi-Arch: same
@@ -113,4 +126,7 @@ Description: Cinnamon pulseaudio abstraction library
  based library, shared between cinnamon-control-center, cinnamon-settings-daemon
  and cinnamon. It is not API stable, and it is meant to be used
  as a submodule.
-Breaks: cinnamon-settings-daemon (<< 5.0)
+Breaks:
+ cinnamon-settings-daemon (<< 6.2),
+ gir1.2-cvc-1.0 (<< ${source:Version}),
+ libcvc0 (<< ${source:Version}),
