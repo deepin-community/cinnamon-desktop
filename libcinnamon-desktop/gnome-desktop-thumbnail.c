@@ -73,13 +73,8 @@ static const char *appname = "gnome-thumbnail-factory";
 static void gnome_desktop_thumbnail_factory_init          (GnomeDesktopThumbnailFactory      *factory);
 static void gnome_desktop_thumbnail_factory_class_init    (GnomeDesktopThumbnailFactoryClass *class);
 
-G_DEFINE_TYPE (GnomeDesktopThumbnailFactory,
-	       gnome_desktop_thumbnail_factory,
-	       G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE (GnomeDesktopThumbnailFactory, gnome_desktop_thumbnail_factory, G_TYPE_OBJECT)
 #define parent_class gnome_desktop_thumbnail_factory_parent_class
-
-#define GNOME_DESKTOP_THUMBNAIL_FACTORY_GET_PRIVATE(object) \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((object), GNOME_DESKTOP_TYPE_THUMBNAIL_FACTORY, GnomeDesktopThumbnailFactoryPrivate))
 
 typedef struct {
     gint width;
@@ -178,6 +173,20 @@ thumbnailer_load (Thumbnailer *thumb)
     }
 
   thumb->try_exec = g_key_file_get_string (key_file, THUMBNAILER_ENTRY_GROUP, "TryExec", NULL);
+  if (thumb->try_exec != NULL)
+    {
+      gchar *path_to_exec = g_find_program_in_path (thumb->try_exec);
+
+      if (path_to_exec == NULL)
+        {
+          g_message ("Ignoring thumbnailer with missing binary: '%s'", thumb->try_exec);
+          thumbnailer_unref (thumb);
+          g_key_file_free (key_file);
+          return NULL;
+        }
+
+      g_free (path_to_exec);
+    }
 
   g_key_file_free (key_file);
 
@@ -209,28 +218,6 @@ thumbnailer_new (const gchar *path)
   thumb->path = g_strdup (path);
 
   return thumbnailer_load (thumb);
-}
-
-static gboolean
-thumbnailer_try_exec (Thumbnailer *thumb)
-{
-  gchar *path;
-  gboolean retval;
-
-  if (G_UNLIKELY (!thumb))
-    return FALSE;
-
-  /* TryExec is optinal, but Exec isn't, so we assume
-   * the thumbnailer can be run when TryExec is not present
-   */
-  if (!thumb->try_exec)
-    return TRUE;
-
-  path = g_find_program_in_path (thumb->try_exec);
-  retval = path != NULL;
-  g_free (path);
-
-  return retval;
 }
 
 static gpointer
@@ -327,7 +314,7 @@ create_loader (GFile        *file,
     loader = gdk_pixbuf_loader_new_with_mime_type (mime_type, &error);
   }
 
-  if (loader == NULL) {
+  if (loader == NULL && error != NULL) {
     g_warning ("Unable to create loader for mime type %s: %s", mime_type, error->message);
     g_clear_error (&error);
     loader = gdk_pixbuf_loader_new ();
@@ -826,7 +813,7 @@ gnome_desktop_thumbnail_factory_init (GnomeDesktopThumbnailFactory *factory)
 {
   GnomeDesktopThumbnailFactoryPrivate *priv;
   
-  factory->priv = GNOME_DESKTOP_THUMBNAIL_FACTORY_GET_PRIVATE (factory);
+  factory->priv = gnome_desktop_thumbnail_factory_get_instance_private (factory);
 
   priv = factory->priv;
   priv->size = GNOME_DESKTOP_THUMBNAIL_SIZE_NORMAL;
@@ -865,8 +852,6 @@ gnome_desktop_thumbnail_factory_class_init (GnomeDesktopThumbnailFactoryClass *c
   gobject_class = G_OBJECT_CLASS (class);
 	
   gobject_class->finalize = gnome_desktop_thumbnail_factory_finalize;
-
-  g_type_class_add_private (class, sizeof (GnomeDesktopThumbnailFactoryPrivate));
 }
 
 /**
@@ -1087,9 +1072,6 @@ gnome_desktop_thumbnail_factory_can_thumbnail (GnomeDesktopThumbnailFactory *fac
 					       const char            *mime_type,
 					       time_t                 mtime)
 {
-  gboolean have_script = FALSE;
-
-
   if (factory->priv->permissions_problem)
     return FALSE;
 
@@ -1111,11 +1093,10 @@ gnome_desktop_thumbnail_factory_can_thumbnail (GnomeDesktopThumbnailFactory *fac
 
   Thumbnailer *thumb;
   thumb = g_hash_table_lookup (factory->priv->mime_types_map, mime_type);
-  have_script = thumbnailer_try_exec (thumb);
 
   g_mutex_unlock (&factory->priv->lock);
 
-  if (have_script || mimetype_supported_by_gdk_pixbuf (mime_type))
+  if (thumb || mimetype_supported_by_gdk_pixbuf (mime_type))
     {
       return !gnome_desktop_thumbnail_factory_has_valid_failed_thumbnail (factory,
                                                                           uri,
@@ -1279,7 +1260,7 @@ gnome_desktop_thumbnail_factory_generate_thumbnail (GnomeDesktopThumbnailFactory
     }
 
   /* Fall back to gdk-pixbuf */
-  if (pixbuf == NULL && !disabled)
+  if (!disabled && pixbuf == NULL && mimetype_supported_by_gdk_pixbuf (mime_type))
     {
       pixbuf = _gdk_pixbuf_new_from_uri_at_scale (uri, size, size, TRUE);
 
@@ -1888,7 +1869,7 @@ gnome_desktop_thumbnail_cache_fix_permissions (void)
 
     pwent = gnome_desktop_get_session_user_pwent ();
 
-    gchar *cache_dir = g_build_filename (pwent->pw_dir, ".cache", "thumbnails", NULL);
+    gchar *cache_dir = g_build_filename (g_get_user_cache_dir (), "thumbnails", NULL);
 
     if (!access_ok (cache_dir, pwent->pw_uid, pwent->pw_gid))
         fix_owner (cache_dir, pwent->pw_uid, pwent->pw_gid);
@@ -1901,7 +1882,7 @@ gnome_desktop_thumbnail_cache_fix_permissions (void)
 /**
  * gnome_desktop_cache_check_permissions:
  * @factory: (allow-none): an optional GnomeDesktopThumbnailFactory
- * @quick: if TRUE, only do a quick check of directory ownersip
+ * @quick: if TRUE, only do a quick check of directory ownership
  * This is more serious than thumbnail ownership issues, and is faster.
  *
  * Returns whether there are any ownership issues with the thumbnail
@@ -1924,8 +1905,7 @@ gnome_desktop_thumbnail_cache_check_permissions (GnomeDesktopThumbnailFactory *f
 
     struct passwd *pwent;
     pwent = gnome_desktop_get_session_user_pwent ();
-
-    gchar *cache_dir = g_build_filename (pwent->pw_dir, ".cache", "thumbnails", NULL);
+    gchar *cache_dir = g_build_filename (g_get_user_cache_dir(), "thumbnails", NULL);
 
     if (!access_ok (cache_dir, pwent->pw_uid, pwent->pw_gid)) {
         checks_out = FALSE;

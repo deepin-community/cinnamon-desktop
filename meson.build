@@ -1,9 +1,7 @@
 # Meson build file
 
 # https://github.com/linuxmint/cinnamon-desktop
-project('cinnamon-desktop', 'c', version: '5.0.0',
-  meson_version: '>=0.41.0'
-)
+project('cinnamon-desktop', 'c', version : '6.2.0', meson_version : '>=0.56.0')
 
 # Before making a release, the LT_VERSION string should be modified.
 # The string is of the form C.R.A.
@@ -35,6 +33,7 @@ gdk_pixb= dependency('gdk-pixbuf-2.0',  version: '>=2.22.0')
 gio     = dependency('gio-2.0',         version: '>=2.37.3')
 glib    = dependency('glib-2.0',        version: '>=2.37.3')
 gtk     = dependency('gtk+-3.0',        version: '>=3.3.16')
+systemd = dependency('libsystemd',      required: get_option('systemd'))
 
 x11     = dependency('x11')
 xext    = dependency('xext',            version: '>=1.1')
@@ -48,6 +47,7 @@ cinnamon_deps = [
   glib,
   gtk,
   math,
+  systemd,
   x11,
   xext,
   xkbconf,
@@ -55,24 +55,9 @@ cinnamon_deps = [
   xrandr,
 ]
 
-# CVC dependencies
-gobject = dependency('gobject-2.0')
-pulse   = dependency('libpulse')
-pulsegl = dependency('libpulse-mainloop-glib')
-
-cvc_deps = cinnamon_deps + [
-  pulse,
-  pulsegl,
-  gobject
-]
-
 use_alsa = get_option('alsa')
 
-if use_alsa
-  cvc_deps += dependency('alsa')
-endif
-
-xkb_base = xkbconf.get_pkgconfig_variable('xkb_base')
+xkb_base = xkbconf.get_variable(pkgconfig: 'xkb_base')
 
 # Path to the pnp.ids file -- to know if we use one shipped with another
 # package, or an internal file
@@ -111,6 +96,7 @@ conf.set('ENABLE_NLS',          cc.has_header('libintl.h'))
 conf.set('HAVE_ALSA',           use_alsa)
 conf.set('HAVE_GETTEXT',        true)
 conf.set('HAVE_INTROSPECTION',  true)
+conf.set('HAVE_SYSTEMD',        systemd.found())
 conf.set('HAVE_TIMERFD',        timerfd_check)
 
 ################################################################################
@@ -144,11 +130,12 @@ message('\n'.join([
   '        sysconfdir:                   ' + get_option('sysconfdir'),
   '        localstatedir:                ' + get_option('localstatedir'),
   '        datadir:                      ' + get_option('datadir'),
-  '        source code location:         ' + meson.source_root(),
+  '        source code location:         ' + meson.project_source_root(),
   '        compiler:                     ' + cc.get_id(),
   '        debugging support:            ' + get_option('buildtype'),
   '        Use *_DISABLE_DEPRECATED:     @0@'.format(get_option('deprecation_warnings')),
   '        Use PNP files:                ' + pnp_message,
   '        Use ALSA:                     ' + '@0@'.format(use_alsa),
+  '        systemd:                      @0@'.format(systemd.found()),
   '',
 ]))

@@ -1,0 +1,2 @@
+# we want only one gir package with both cdesktopenums and cinnamondesktop
+gir1.2-cinnamondesktop-3.0: typelib-package-name-does-not-match gir1.2-cdesktopenums-3.0 [usr/lib/x86_64-linux-gnu/girepository-1.0/CDesktopEnums-3.0.typelib]

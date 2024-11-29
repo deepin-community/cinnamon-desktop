@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  */
 
@@ -32,6 +32,7 @@
 #include "gvc-mixer-stream.h"
 #include "gvc-mixer-stream-private.h"
 #include "gvc-channel-map-private.h"
+#include "gvc-enum-types.h"
 
 static guint32 stream_serial = 1;
 
@@ -57,6 +58,7 @@ struct GvcMixerStreamPrivate
         char          *port;
         char          *human_port;
         GList         *ports;
+        GvcMixerStreamState state;
 };
 
 enum
@@ -80,6 +82,7 @@ enum
         PROP_IS_VIRTUAL,
         PROP_CARD_INDEX,
         PROP_PORT,
+        PROP_STATE,
 };
 
 enum {
@@ -164,9 +167,9 @@ gvc_mixer_stream_get_channel_map (GvcMixerStream *stream)
  * gvc_mixer_stream_get_volume:
  * @stream:
  *
- * Returns: (type guint32):
+ * Returns:
  */
-pa_volume_t
+guint32
 gvc_mixer_stream_get_volume (GvcMixerStream *stream)
 {
         g_return_val_if_fail (GVC_IS_MIXER_STREAM (stream), 0);
@@ -186,13 +189,13 @@ gvc_mixer_stream_get_decibel (GvcMixerStream *stream)
 /**
  * gvc_mixer_stream_set_volume:
  * @stream:
- * @volume: (type guint32):
+ * @volume:
  *
  * Returns:
  */
 gboolean
 gvc_mixer_stream_set_volume (GvcMixerStream *stream,
-                              pa_volume_t     volume)
+                             guint32         volume)
 {
         pa_cvolume cv;
 
@@ -492,9 +495,9 @@ gvc_mixer_stream_set_sysfs_path (GvcMixerStream *stream,
  * gvc_mixer_stream_get_base_volume:
  * @stream:
  *
- * Returns: (type guint32):
+ * Return value:
  */
-pa_volume_t
+guint32
 gvc_mixer_stream_get_base_volume (GvcMixerStream *stream)
 {
         g_return_val_if_fail (GVC_IS_MIXER_STREAM (stream), 0);
@@ -505,13 +508,13 @@ gvc_mixer_stream_get_base_volume (GvcMixerStream *stream)
 /**
  * gvc_mixer_stream_set_base_volume:
  * @stream:
- * @base_volume: (type guint32):
+ * @base_volume: (type guint32)
  *
  * Returns:
  */
 gboolean
 gvc_mixer_stream_set_base_volume (GvcMixerStream *stream,
-                                  pa_volume_t base_volume)
+                                  guint32         base_volume)
 {
         g_return_val_if_fail (GVC_IS_MIXER_STREAM (stream), FALSE);
 
@@ -586,6 +589,27 @@ gvc_mixer_stream_get_ports (GvcMixerStream *stream)
 {
         g_return_val_if_fail (GVC_IS_MIXER_STREAM (stream), NULL);
         return stream->priv->ports;
+}
+
+gboolean
+gvc_mixer_stream_set_state (GvcMixerStream      *stream,
+                            GvcMixerStreamState  state)
+{
+        g_return_val_if_fail (GVC_IS_MIXER_STREAM (stream), FALSE);
+
+        if (stream->priv->state != state) {
+                stream->priv->state = state;
+                g_object_notify (G_OBJECT (stream), "state");
+        }
+
+        return TRUE;
+}
+
+GvcMixerStreamState
+gvc_mixer_stream_get_state (GvcMixerStream      *stream)
+{
+        g_return_val_if_fail (GVC_IS_MIXER_STREAM (stream), GVC_STREAM_STATE_INVALID);
+        return stream->priv->state;
 }
 
 static int
@@ -694,6 +718,9 @@ gvc_mixer_stream_set_property (GObject       *object,
         case PROP_PORT:
                 gvc_mixer_stream_set_port (self, g_value_get_string (value));
                 break;
+        case PROP_STATE:
+                gvc_mixer_stream_set_state (self, g_value_get_enum (value));
+                break;
         case PROP_CARD_INDEX:
                 self->priv->card_index = g_value_get_long (value);
                 break;
@@ -764,6 +791,9 @@ gvc_mixer_stream_get_property (GObject     *object,
                 break;
         case PROP_PORT:
                 g_value_set_string (value, self->priv->port);
+                break;
+        case PROP_STATE:
+                g_value_set_enum (value, self->priv->state);
                 break;
         case PROP_CARD_INDEX:
                 g_value_set_long (value, self->priv->card_index);
@@ -847,6 +877,8 @@ gvc_mixer_stream_change_is_muted (GvcMixerStream *stream,
 gboolean
 gvc_mixer_stream_is_running (GvcMixerStream *stream)
 {
+        g_return_val_if_fail (GVC_IS_MIXER_STREAM (stream), FALSE);
+
         if (stream->priv->change_volume_op == NULL)
                 return FALSE;
 
@@ -1139,13 +1171,20 @@ gvc_mixer_stream_class_init (GvcMixerStreamClass *klass)
                                                               NULL,
                                                               G_PARAM_READWRITE));
         g_object_class_install_property (gobject_class,
+                                         PROP_STATE,
+                                         g_param_spec_enum ("state",
+                                                            "State",
+                                                            "The current state of this stream",
+                                                            GVC_TYPE_MIXER_STREAM_STATE,
+                                                            GVC_STREAM_STATE_INVALID,
+                                                            G_PARAM_READWRITE));
+        g_object_class_install_property (gobject_class,
                                          PROP_CARD_INDEX,
                                          g_param_spec_long ("card-index",
                                                              "Card index",
                                                              "The index of the card for this stream",
                                                              PA_INVALID_INDEX, G_MAXLONG, PA_INVALID_INDEX,
                                                              G_PARAM_READWRITE|G_PARAM_CONSTRUCT));
-
         signals [MONITOR_UPDATE] =
                 g_signal_new ("monitor-update",
                               G_TYPE_FROM_CLASS (klass),
@@ -1162,7 +1201,6 @@ gvc_mixer_stream_class_init (GvcMixerStreamClass *klass)
                               NULL, NULL,
                               g_cclosure_marshal_VOID__VOID,
                               G_TYPE_NONE, 0, G_TYPE_NONE);
-
 }
 
 static void
@@ -1210,8 +1248,7 @@ gvc_mixer_stream_finalize (GObject *object)
         g_free (mixer_stream->priv->human_port);
         mixer_stream->priv->human_port = NULL;
 
-        g_list_foreach (mixer_stream->priv->ports, (GFunc) free_port, NULL);
-        g_list_free (mixer_stream->priv->ports);
+        g_list_free_full (mixer_stream->priv->ports, (GDestroyNotify) free_port);
         mixer_stream->priv->ports = NULL;
 
        if (mixer_stream->priv->change_volume_op) {

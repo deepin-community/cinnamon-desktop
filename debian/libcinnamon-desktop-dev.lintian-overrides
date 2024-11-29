@@ -1,0 +1,2 @@
+# is not missing but the package name is gir1.2-cinnamondesktop-3.0 instead
+libcinnamon-desktop-dev: gir-missing-typelib-dependency gir1.2-cdesktopenums-3.0 [usr/share/gir-1.0/CDesktopEnums-3.0.gir]

@@ -9,3 +9,8 @@ if linux-any set this as default for all users:
     gsettings set org.cinnamon.desktop.session settings-daemon-uses-logind true
 
 We must found the right and better way to do it in debian package.
+
+========================================================
+- check if change theme to default d/patch is still correct/needed after muffin rebase
+- mimeapps.list specify software that may be not installed in minimal installation,
+  without cinnamon meta packages or other users changes, need to be improved or removed

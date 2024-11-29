@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  */
 
@@ -26,6 +26,8 @@
 
 #include <glib.h>
 #include <glib/gi18n-lib.h>
+
+#include <pulse/pulseaudio.h>
 
 #include "gvc-channel-map.h"
 #include "gvc-channel-map-private.h"
@@ -176,7 +178,7 @@ gvc_channel_map_get_lfe (GvcChannelMap *map)
                 return 0;
 
         if (gvc_channel_map_has_lfe (map))
-            // there is a funtion for this in pa 7.1, but it is not used here for backward
+            // there is a function for this in pa 7.1, but it is not used here for backward
             // compatibility
             return (gfloat) pa_cvolume_get_position (&map->priv->pa_volume, &map->priv->pa_map, PA_CHANNEL_POSITION_LFE);
         else
@@ -196,7 +198,7 @@ gvc_channel_map_set_lfe (GvcChannelMap *map,
 
         cv = *gvc_channel_map_get_cvolume (map);
 
-        // there is a funtion for this in pa 7.1, but it is not used here for backward
+        // there is a function for this in pa 7.1, but it is not used here for backward
         // compatibility
         pa_cvolume_set_position (&cv, &map->priv->pa_map, PA_CHANNEL_POSITION_LFE, value);
 
@@ -225,6 +227,7 @@ gvc_channel_map_get_mapping (const GvcChannelMap  *map)
 
 /**
  * gvc_channel_map_has_position:
+ * @map:
  * @position: (type int)
  *
  * Returns:
